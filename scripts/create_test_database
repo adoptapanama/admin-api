@@ -1,0 +1,3 @@
+#!/bin/bash
+
+mysql -u$DB_USER -h$DB_HOST `if [ $DB_PASSWORD ]; then echo "-p$DB_PASSWORD"; fi` -e "DROP DATABASE IF EXISTS ${DB_NAME}_test; CREATE DATABASE ${DB_NAME}_test"

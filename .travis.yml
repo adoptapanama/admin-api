@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+  - "8.9.1"
+install:
+  - npm install
+script:
+  - npm run coverage
+services:
+  - mysql
+  - redis-server
+before_install:
+  - mysql -e 'CREATE DATABASE adoptapanama_test;'
+env:
+  - DB_USER=root DB_NAME=adoptapanama_test REDIS_HOST=localhost DB_HOST=localhost SERVER_SESSION_KEY=m6J63c3qdkcAADSy7FgeXqLkRLqvjAGDsSPZcwKQw6QmhJyNq5FdpZAxM3E8ZqN3 SESSION_SALT=2QMXdVnsrc5d2tsd6AAc8AZ6

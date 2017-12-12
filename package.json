@@ -1,0 +1,67 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "description": "Adopta Panama Core HapiJS Services",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js | node_modules/.bin/bunyan",
+    "test": "NODE_ENV=test scripts/run_tests",
+    "test:debug": "NODE_ENV=test scripts/debug_tests",
+    "precoverage": "NODE_ENV=test scripts/create_test_database && NODE_ENV=test node scripts/migrate --up | node_modules/.bin/bunyan",
+    "coverage": "NODE_ENV=test ./node_modules/lab/bin/lab -C -l -L -M 30000 -r html -o ./coverage/index.html -r console -o stdout",
+    "coverage:open": "scripts/open_coverage",
+    "debug": "scripts/debug",
+    "db:migrate": "scripts/migrate --up | node_modules/.bin/bunyan",
+    "db:migrate:down": "scripts/migrate --down | node_modules/.bin/bunyan",
+    "licenses": "./node_modules/licensecheck/bin/licensecheck",
+    "docker:start": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:stop": "docker-compose -f docker-compose.dev.yml kill",
+    "docker:rm": "docker-compose -f docker-compose.dev.yml rm -f",
+    "docker:build": "docker-compose -f docker-compose.dev.yml build",
+    "docker:kill": "npm run docker:stop && npm run docker:rm",
+    "docker:update": "docker-compose -f docker-compose.dev.yml pull",
+    "docker:bash": "docker exec -it `docker ps | grep core-api | awk '{print $1}'` bash || true",
+    "production": "scripts/wait_for_db | node_modules/.bin/bunyan && npm run db:migrate | node_modules/.bin/bunyan && NODE_ENV=production node_modules/.bin/forever index.js | node_modules/.bin/bunyan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adoptapanama/api.git"
+  },
+  "author": "Adopta Panama",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adoptapanama/api/issues"
+  },
+  "homepage": "https://adoptapanama.com",
+  "dependencies": {
+    "bluebird": "^3.3.4",
+    "boom": "^3.2.1",
+    "bunyan": "^1.8.1",
+    "commander": "^2.12.2",
+    "error-factory": "^0.1.6",
+    "eslint-plugin-hapi": "^4.0.0",
+    "forever": "^0.15.3",
+    "hapi": "^16.5.2",
+    "hapi-auth-jwt2": "^7.3.0",
+    "hapi-swagger": "^4.3.0",
+    "inert": "^3.2.1",
+    "joi": "^8.4.2",
+    "jsonwebtoken": "^5.7.0",
+    "lodash": "^4.6.1",
+    "moment": "^2.19.4",
+    "mysql2": "^1.4.2",
+    "newrelic": "^2.2.1",
+    "redis": "^2.8.0",
+    "sequelize": "^4.28.6",
+    "umzug": "^2.0.1",
+    "uuid": "^3.1.0",
+    "vision": "^4.1.1"
+  },
+  "devDependencies": {
+    "code": "^4.1.0",
+    "lab": "^14.2.2",
+    "licensecheck": "^0.3.0",
+    "open": "0.0.5",
+    "sinon": "^1.17.3"
+  }
+}

@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+'use strict';
+const bunyan = require('bunyan');
+const program = require('commander');
+
+const migration = require('../lib/migrations');
+const { options: loggerConfig } = require('../config/logs');
+
+const log = bunyan.createLogger(loggerConfig);
+
+// Define options
+program
+  .version('0.1.0')
+  .option('-u, --up', 'Run pending migrations')
+  .option('-d, --down', 'Revert to the previous migration')
+  .option('-t, --to [migration_name]', 'Run/revert migrations of to given [migration_name]')
+  .parse(process.argv);
+
+let action;
+if (program.up) {
+  action = migration.up;
+} else if (program.down) {
+  action = migration.down;
+} else {
+  log.info('No migrations performed.');
+  return process.exit(0);
+}
+
+let params;
+
+if (program.to) {
+  params = (program.to === '0') ? { to: 0 } : { to: program.to };
+}
+
+return action.call(migration, params)
+  .then((migrations) => {
+    if (!migrations.length) {
+      log.info('There are no pending migrations.');
+    } else {
+      log.info(`Ran ${migrations.length} migration${migrations.length > 1 ? 's' : ''} successfully.`);
+    }
+    return process.exit(0);
+  })
+  .catch((err) => {
+    log.error(err.stack);
+    return process.exit(1);
+  });
