@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+'use strict';
+
+const bunyan = require('bunyan');
+const Promise = require('bluebird');
+const Sequelize = require('sequelize');
+
+const { config } = require('../config/database').options;
+const { options: loggerConfig } = require('../config/logs');
+
+const log = bunyan.createLogger(loggerConfig);
+
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  host: config.host,
+  dialect: config.dialect,
+  storage: config.storage,
+  dialectOptions: { connectTimeout: 30000 },
+  logging: false
+});
+
+function waitForDB() {
+  return new Promise((resolve, reject) => {
+    let tryCount = 0;
+
+    function testConnection(err) {
+      tryCount++;
+
+      if (tryCount > 10) {
+        return reject(err);
+      }
+
+      sequelize.authenticate()
+        .then(() => {
+          return resolve();
+        })
+        .catch(() => {
+          log.warn('No connection. Retrying...');
+          setTimeout(testConnection, 10000);
+        });
+    }
+
+    log.info('Waiting for db connection...');
+    testConnection();
+  });
+}
+
+return waitForDB()
+  .then(() => {
+    log.info('DB connection successful!');
+    return process.exit(0);
+  })
+  .catch((err) => {
+    log.error('DB connection failed: ' + err.message);
+    return process.exit(1);
+  });

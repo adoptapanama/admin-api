@@ -1,0 +1,35 @@
+version: '2'
+services:
+  core-api:
+    build:
+      context: ./
+      dockerfile: 'Dockerfile-dev'
+    links:
+      - mysql
+      - redis
+    ports:
+      - '3000:3000'
+      - '9229:9229'
+    env_file:
+      - ./services.env
+    environment:
+      DB_USER: 'root'
+      DB_PASSWORD: 'adoptapanama'
+      DB_NAME: 'adoptapanama'
+      DB_HOST: 'mysql'
+    volumes:
+      - './:/app'
+    depends_on:
+      - 'mysql'
+    command: 'sleep infinity'
+  mysql:
+    image: 'mysql:latest'
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=adoptapanama
+      - MYSQL_DATABASE=adoptapanama
+  redis:
+    image: redis:4
+    ports:
+      - 6379:6379
