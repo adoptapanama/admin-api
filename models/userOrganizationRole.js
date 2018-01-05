@@ -66,13 +66,25 @@ module.exports = function(db) {
         as: 'role',
         include: [{
           model: this.sequelize.models.Permission,
-          as: 'permissions'
+          as: 'permissions',
+          order: [['resource', 'ASC'], ['name', 'ASC']]
         }]
       }, {
         model: this.sequelize.models.User,
         as: 'user',
         attributes: ['id']
       }]
+    });
+  };
+
+  UserOrganizationRole.listPermissionsForRole = async function(id) {
+    const record = await this.getRecord(id);
+    return record.role.permissions;
+  };
+
+  UserOrganizationRole.removeRoleFromUser = function(userId, roleId, organizationId) {
+    return this.destroy({
+      where: { userId, roleId, organizationId }
     });
   };
 

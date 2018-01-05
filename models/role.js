@@ -26,6 +26,18 @@ module.exports = function(db) {
     return this.create({ name, description });
   };
 
+  Role.getRole = function(id) {
+    return this.findOne({
+      where: { id }
+    });
+  };
+
+  Role.getByName = function(name) {
+    return this.findOne({
+      where: { name }
+    });
+  };
+
   return Role;
 };
 

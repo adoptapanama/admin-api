@@ -16,14 +16,15 @@ function errorHandler(reply, e) {
   return this.helpers.errorHandler.apply(this, arguments);
 }
 
-async function createSession(user, permissions, organizationId, device) {
+async function createSession(user, permissions, organizationId, device, userOrganizationRoleId) {
   const session = this.helpers.createRandomBytes(64);
   const sessionHash = this.helpers.md5(`${config.sessionSalt}${session}`);
   const jwt = this.helpers.createJWTToken({
     userId: user.id,
     organizationId,
     super: user.isSuper(),
-    hash: sessionHash
+    hash: sessionHash,
+    roleId: userOrganizationRoleId
   });
 
   await Promise.all([this.redis.remove(`session:${device}:${user.id}`), this.redis.remove(`permissions:${device}:${user.id}`)]);
@@ -76,7 +77,7 @@ exports.login = async function({ headers, payload }, reply) {
       // If user only has one role, immediately log him in that role
       let permissions = await user.roles[0].getPermissions();
       permissions = permissions.map(({ resource, name }) => `${resource}:${name}`);
-      const jwt = await createSession.call(this, user, permissions, user.roles[0].organization.id, headers.device);
+      const jwt = await createSession.call(this, user, permissions, user.roles[0].organization.id, headers.device, user.roles[0].userOrganizationRoleId);
       return reply(Formatters.jwt(jwt)).code(200);
     }
 
@@ -117,7 +118,7 @@ exports.changeRole = async function({ auth, params, headers }, reply) {
 
     // Start a new session
     const permissions = userOrganizationRole.role.permissions.map(({ resource, name }) => `${resource}:${name}`);
-    const jwt = await createSession.call(this, userOrganizationRole.user, permissions, userOrganizationRole.organizationId, headers.device);
+    const jwt = await createSession.call(this, userOrganizationRole.user, permissions, userOrganizationRole.organizationId, headers.device, userOrganizationRole.id);
     return reply(Formatters.jwt(jwt)).code(200);
   } catch (e) {
     return errorHandler.call(this, reply, e);

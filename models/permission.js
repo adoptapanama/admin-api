@@ -23,7 +23,9 @@ module.exports = function(db) {
 
   // Static Methods
   Permission.listPermissions = function() {
-    return this.findAll();
+    return this.findAll({
+      order: [['resource', 'ASC'], ['name', 'ASC']]
+    });
   };
 
   Permission.getPermission = function(resource, name) {
