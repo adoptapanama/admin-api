@@ -1,5 +1,6 @@
-# Adopta Panama Core HapiJS API Services
-[![Build Status](https://travis-ci.org/adoptapanama/api.svg?branch=master)](https://travis-ci.org/adoptapanama/api)
+# Adopta Panama Core Admin API Services
+[![Build Status](https://travis-ci.org/adoptapanama/admin-api.svg?branch=master)](https://travis-ci.org/adoptapanama/admin-api)
+
 Adopta Panama Core Backend Services. This application serves the website, the admin ui and the mobile app. Although it can run natively in a server, it is better suited to run within docker containers.
 
 ### Requirements
@@ -28,7 +29,7 @@ However, the service in development must be run within the container to ensure t
 
 Same applies to installing packages with `npm install`. This has to be done within the container itself.
 
-Finally, all development is done via feature branches in your forked repository, and then a PR is made into the develop branch in adoptapanama/api.git repository. Releases are made into the master branch.
+Finally, all development is done via feature branches in your forked repository, and then a PR is made into the develop branch in adoptapanama/admin-api.git repository. Releases are made into the master branch.
 
 ### Requirements
 -   Docker >= 1.10 : [Installation Instructions Linux](https://docs.docker.com/linux/step_one/) - [Installation Instructions Mac](https://docs.docker.com/mac/step_one/)
@@ -36,20 +37,20 @@ Finally, all development is done via feature branches in your forked repository,
 
 ### Installing the app
 
-You must first fork the api repository from Adopta Panama's Github into your Github account:
+You must first fork the admin api repository from Adopta Panama's Github into your Github account:
 
-[https://github.com/adoptapanama/api.git](https://github.com/adoptapanama/api.git)
+[https://github.com/adoptapanama/admin-api.git](https://github.com/adoptapanama/admin-api.git)
 
 Next, clone the repository from your Github account
 
 ```shell
-git clone git@github.com:{your github account}/api.git
+git clone git@github.com:{your github account}/admin-api.git
 ```
 
 Next make sure you set the proper upstream to keep your code up to date.
 
 ```shell
-git remote add upstream git@github.com:adoptapanama/api.git
+git remote add upstream git@github.com:adoptapanama/admin-api.git
 ```
 
 Once you've downloaded the files, change to the develop branch where the latest development code is.
