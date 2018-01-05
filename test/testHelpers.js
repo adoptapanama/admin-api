@@ -72,6 +72,92 @@ function logIn(user) {
   });
 }
 
+async function createTestSetup() {
+  const { Permission, User, Organization, Role } = server.server.models;
+
+  const [firstOrganization, secondOrganization] = await Promise.all([
+    Organization.createOrganization('First Organization', 'First'),
+    Organization.createOrganization('Second Organization', 'Second')
+  ]);
+
+  // Create role
+  const role = await Role.createRole('Test Role', 'Test role');
+  const permission = await Permission.getPermission('users', 'list');
+  await role.setPermissions([permission]);
+
+  const [userWithOneRole, superUser, userWithMultipleRoles, userWithNoRoles] = await Promise.all([
+    User.createUser({
+      name: 'One Role',
+      email: 'onerole@user.com',
+      password: 'testtest'
+    }),
+    User.createUser({
+      name: 'Super User',
+      email: 'super@user.com',
+      password: 'testtest',
+      super: true
+    }),
+    User.createUser({
+      name: 'Multiple Roles',
+      email: 'multiplerole@user.com',
+      password: 'testtest'
+    }),
+    User.createUser({
+      name: 'No Role',
+      email: 'norole@user.com',
+      password: 'testtest'
+    })
+  ]);
+
+  // Start setting roles
+  await Promise.all([
+    userWithOneRole.addRole(role, firstOrganization),
+    userWithMultipleRoles.addRole(role, firstOrganization),
+    userWithMultipleRoles.addRole(role, secondOrganization)
+  ]);
+
+  return {
+    users: [userWithOneRole, superUser, userWithMultipleRoles, userWithNoRoles],
+    role,
+    organizations: [firstOrganization, secondOrganization]
+  };
+}
+
+async function resetTestSetup() {
+  const { User, Organization, Role } = server.server.models;
+
+  const [userWithOneRole, superUser, userWithMultipleRoles, userWithNoRoles] = await Promise.all([
+    User.getUserByEmail('onerole@user.com'),
+    User.getUserByEmail('super@user.com'),
+    User.getUserByEmail('multiplerole@user.com'),
+    User.getUserByEmail('norole@user.com')
+  ]);
+
+  const role = await Role.getByName('Test Role');
+  const [firstOrganization, secondOrganization] = await Promise.all([
+    Organization.getOrganizationByName('First Organization'),
+    Organization.getOrganizationByName('Second Organization')
+  ]);
+
+  // Remove roles from users
+  await Promise.all([
+    userWithOneRole.removeRole(role, firstOrganization),
+    userWithMultipleRoles.removeRole(role, firstOrganization),
+    userWithMultipleRoles.removeRole(role, secondOrganization)
+  ]);
+
+  // Destroy organizations, roles, and users
+  await Promise.all([
+    role.destroy(),
+    firstOrganization.destroy(),
+    secondOrganization.destroy(),
+    userWithOneRole.destroy(),
+    userWithMultipleRoles.destroy(),
+    superUser.destroy(),
+    userWithNoRoles.destroy()
+  ]);
+}
+
 Object.assign(global, {
   expect: Code.expect,
   describe: lab.describe,
@@ -86,5 +172,7 @@ Object.assign(global, {
   invalidToken,
   createToken,
   runTest,
-  logIn
+  logIn,
+  createTestSetup,
+  resetTestSetup
 });

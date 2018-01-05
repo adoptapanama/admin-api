@@ -20,15 +20,11 @@ routes.push({
         responses: {
           '200': {
             description: 'Success',
-            schema: SCHEMAS.PermissionListing
+            schema: SCHEMAS.Permissions
           },
           '401': {
             description: 'Unauthorized',
             schema: SCHEMAS.Errors.AuthenticationError
-          },
-          '403': {
-            description: 'Forbidden',
-            schema: SCHEMAS.Errors.ForbiddenError
           },
           '500': {
             description: 'Internal Server Error',
@@ -39,8 +35,7 @@ routes.push({
     },
     tags: ['api'],
     validate: {
-      headers: SCHEMAS.AuthorizationToken,
-      query: SCHEMAS.Query
+      headers: SCHEMAS.AuthorizationToken
     }
   }
 });
