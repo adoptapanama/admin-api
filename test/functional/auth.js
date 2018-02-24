@@ -4,68 +4,27 @@ const uuid = require('uuid/v4');
 const jwt = require('jsonwebtoken');
 const config = require('../../config/server');
 
-let Organization, Permission, Role, User, UserOrganizationRole;
+let User, UserOrganizationRole;
 
 exports.lab = Lab.script();
 const server = Server.server;
 
 describe('Authentication resources', () => {
-  let firstOrganization, secondOrganization;
-  let role;
+  let firstOrganization;
   let superUser, userWithMultipleRoles, userWithNoRoles, userWithOneRole;
+
   before(async () => {
     await Server.initialize();
-    ({ Permission, User, UserOrganizationRole, Organization, Role } = server.models);
+    ({ User, UserOrganizationRole } = server.models);
 
-    [firstOrganization, secondOrganization] = await Promise.all([
-      Organization.createOrganization('First Organization', 'First'),
-      Organization.createOrganization('Second Organization', 'Second')
-    ]);
+    const setup = await createTestSetup();
 
-    // Create role
-    role = await Role.createRole('Test Role', 'Test role');
-    const permission = await Permission.getPermission('users', 'list');
-    await role.setPermissions([permission]);
-
-    [userWithOneRole, superUser, userWithMultipleRoles, userWithNoRoles] = await Promise.all([
-      User.createUser({
-        name: 'One Role',
-        email: 'onerole@user.com',
-        password: 'testtest'
-      }),
-      User.createUser({
-        name: 'Super User',
-        email: 'super@user.com',
-        password: 'testtest',
-        super: true
-      }),
-      User.createUser({
-        name: 'Multiple Roles',
-        email: 'multiplerole@user.com',
-        password: 'testtest'
-      }),
-      User.createUser({
-        name: 'No Role',
-        email: 'norole@user.com',
-        password: 'testtest'
-      })
-    ]);
-
-    // Start setting roles
-    await Promise.all([
-      userWithOneRole.addRole(role, firstOrganization),
-      userWithMultipleRoles.addRole(role, firstOrganization),
-      userWithMultipleRoles.addRole(role, secondOrganization)
-    ]);
+    [firstOrganization] = setup.organizations;
+    [userWithOneRole, superUser, userWithMultipleRoles, userWithNoRoles] = setup.users;
   });
 
   after(() => {
-    return Promise.all([
-      userWithOneRole.destroy(),
-      superUser.destroy(),
-      userWithMultipleRoles.destroy(),
-      userWithNoRoles.destroy()
-    ]);
+    return resetTestSetup();
   });
 
   describe('POST /auth/login', () => {
@@ -182,7 +141,8 @@ describe('Authentication resources', () => {
     });
 
     describe('when user has one role', () => {
-      it('should return a jwt with the user immediately logged into that role with the role permissions', () => {
+      it('should return a jwt with the user immediately logged into that role with the role permissions', async () => {
+        const [role] = await userWithOneRole.getRoles();
         return callServer(userWithOneRole.email, 'testtest', ({ statusCode, result }) => {
           expect(statusCode).to.equal(200);
           expect(result).to.equal({
@@ -199,7 +159,8 @@ describe('Authentication resources', () => {
             sub: userWithOneRole.id,
             org: firstOrganization.id,
             super: false,
-            jti: decoded.jti
+            jti: decoded.jti,
+            rid: role.userOrganizationRoleId
           });
           const signedPermission = server.helpers.md5(`${decoded.jti}users:list${config.sessionSalt}${firstOrganization.id}`);
           expect(server.redis.set.lastCall.args).to.equal([`permissions:client:${userWithOneRole.id}`, [signedPermission]]);
@@ -503,7 +464,8 @@ describe('Authentication resources', () => {
           sub: userWithMultipleRoles.id,
           org: firstOrganization.id,
           super: false,
-          jti: decoded.jti
+          jti: decoded.jti,
+          rid: roleId
         });
         const signedPermission = server.helpers.md5(`${decoded.jti}users:list${config.sessionSalt}${firstOrganization.id}`);
         expect(server.redis.set.lastCall.args).to.equal([`permissions:client:${userWithMultipleRoles.id}`, [signedPermission]]);

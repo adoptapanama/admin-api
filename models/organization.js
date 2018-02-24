@@ -27,6 +27,12 @@ module.exports = function(db) {
     return this.create({ name, description });
   };
 
+  Organization.getOrganizationByName = function(name) {
+    return this.findOne({
+      where: { name }
+    });
+  };
+
   return Organization;
 };
 

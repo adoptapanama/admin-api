@@ -60,7 +60,7 @@ module.exports = function(db) {
     return this.password === passwordHash(password, this.salt);
   };
 
-  User.prototype.addRole = async function(role, organization) {
+  User.prototype.addRole = async function(role = {}, organization = {}) {
     await this.sequelize.models.UserOrganizationRole.createRecord(this, role, organization);
     return this.getRoles();
   };
@@ -69,6 +69,10 @@ module.exports = function(db) {
     const roles = await this.sequelize.models.UserOrganizationRole.getUserRoles(this);
     this.roles = roles;
     return roles;
+  };
+
+  User.prototype.removeRole = function(role = {}, organization = {} ) {
+    return this.sequelize.models.UserOrganizationRole.removeRoleFromUser(this.id, role.id, organization.id);
   };
 
   // Static Methos
@@ -88,7 +92,7 @@ module.exports = function(db) {
     });
   };
 
-  User.getUserByEmail = function(email, queryOpts = {}) {
+  User.getUserByEmail = function(email) {
     return this.findOne({
       where: { email }
     });
