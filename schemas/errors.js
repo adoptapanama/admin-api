@@ -39,6 +39,7 @@ Errors.BadRequestLoginError = validationError(400, 'Bad Request', 'child "email"
 Errors.BadRequestOrganizationError = validationError(400, 'Bad Request', 'child "name" fails because ["Name" is required]', 'BadRequestOrganizationError');
 Errors.BadRequestUserError = validationError(400, 'Bad Request', 'child "email" fails because ["Email" is required]', 'BadRequestEmailError');
 Errors.BadRequestRoleError = validationError(400, 'Bad Request', 'child "name" fails because ["Name" is required]', 'BadRequestRoleError');
+Errors.BadRequestSpeciesError = validationError(400, 'Bad Request', 'child "name" fails because ["Name" is required]', 'BadRequestSpeciesError');
 
 // Authentication Errors
 Errors.AuthenticationError = boomError(401, 'Unauthorized', 'Resource needs authentication', 'AuthenticationError');
