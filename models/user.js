@@ -1,6 +1,7 @@
 'use strict';
 const crypto = require('crypto');
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const Helpers = require('../lib/helpers').fn;
 
 function passwordHash(password, salt) {
@@ -96,6 +97,44 @@ module.exports = function(db) {
     return this.findOne({
       where: { email }
     });
+  };
+
+  User.listUsers = function(options = {}) {
+    const query = {};
+
+    if (options.q) {
+      query.where = {
+        [Op.or]: {
+          name: {
+            [Op.like]: `%${options.q}%`
+          },
+          email: {
+            [Op.like]: `%${options.q}%`
+          }
+        }
+      };
+    }
+
+    // Sorting
+    switch (options.sort) {
+      case 'name':
+        query.order = [['name', options.order || 'asc']];
+        break;
+      case 'email':
+        query.order = [['email', options.order || 'asc']];
+        break;
+    }
+
+    // Pagination
+    if (options.count !== undefined) {
+      query.limit = options.count;
+    }
+
+    if (options.cursor !== undefined) {
+      query.offset = options.cursor;
+    }
+
+    return this.findAll(query);
   };
 
   return User;
