@@ -30,11 +30,13 @@ describe('Authentication resources', () => {
   describe('POST /auth/login', () => {
     before((done) => {
       sinon.spy(server.redis, 'set');
+      sinon.spy(server.redis, 'addToSet');
       return done();
     });
 
     after((done) => {
       server.redis.set.restore();
+      server.redis.addToSet.restore();
       return done();
     });
 
@@ -135,7 +137,7 @@ describe('Authentication resources', () => {
         return callServer(superUser.email, 'testtest', ({ result }) => {
           const decoded = jwt.verify(result['access_token'], config.jwtSessionKey);
           const signedSuper = server.helpers.md5(`${decoded.jti}super${config.sessionSalt}`);
-          expect(server.redis.set.lastCall.args).to.equal([`permissions:client:${superUser.id}`, [signedSuper]]);
+          expect(server.redis.addToSet.lastCall.args).to.equal([`permissions:client:${superUser.id}`, [signedSuper]]);
         });
       });
     });
@@ -163,7 +165,7 @@ describe('Authentication resources', () => {
             rid: role.userOrganizationRoleId
           });
           const signedPermission = server.helpers.md5(`${decoded.jti}users:list${config.sessionSalt}${firstOrganization.id}`);
-          expect(server.redis.set.lastCall.args).to.equal([`permissions:client:${userWithOneRole.id}`, [signedPermission]]);
+          expect(server.redis.addToSet.lastCall.args).to.equal([`permissions:client:${userWithOneRole.id}`, [signedPermission]]);
         });
       });
     });
@@ -446,6 +448,7 @@ describe('Authentication resources', () => {
     it('should return a new jwt, close the previous session, start a new one, and set the new role permissions', async () => {
       const token = await logIn(userWithMultipleRoles);
       sinon.spy(server.redis, 'set');
+      sinon.spy(server.redis, 'addToSet');
       sinon.spy(server.redis, 'remove');
 
       return callServer(roleId, token, ({ statusCode, result}) => {
@@ -468,12 +471,16 @@ describe('Authentication resources', () => {
           rid: roleId
         });
         const signedPermission = server.helpers.md5(`${decoded.jti}users:list${config.sessionSalt}${firstOrganization.id}`);
-        expect(server.redis.set.lastCall.args).to.equal([`permissions:client:${userWithMultipleRoles.id}`, [signedPermission]]);
+        expect(server.redis.addToSet.lastCall.args).to.equal([`permissions:client:${userWithMultipleRoles.id}`, [signedPermission]]);
 
         expect(server.redis.set.firstCall.args).to.equal([`session:client:${userWithMultipleRoles.id}`, server.helpers.md5(`${decoded.jti}${config.sessionSalt}`)]);
         expect(server.redis.remove.callCount).to.equal(2);
         expect(server.redis.remove.firstCall.args).to.equal([`session:client:${userWithMultipleRoles.id}`]);
         expect(server.redis.remove.lastCall.args).to.equal([`permissions:client:${userWithMultipleRoles.id}`]);
+
+        server.redis.set.restore();
+        server.redis.addToSet.restore();
+        server.redis.remove.restore();
       });
     });
 

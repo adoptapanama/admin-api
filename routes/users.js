@@ -16,6 +16,10 @@ routes.push({
     description: 'List all users',
     notes: 'Lists all users the currently logged user is allowed to see',
     plugins: {
+      'policy': {
+        resource: 'users',
+        name: 'list'
+      },
       'hapi-swagger': {
         responses: {
           '200': {
