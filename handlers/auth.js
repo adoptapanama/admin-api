@@ -19,6 +19,7 @@ function errorHandler(reply, e) {
 async function createSession(user, permissions, organizationId, device, userOrganizationRoleId) {
   const session = this.helpers.createRandomBytes(64);
   const sessionHash = this.helpers.md5(`${config.sessionSalt}${session}`);
+
   const jwt = this.helpers.createJWTToken({
     userId: user.id,
     organizationId,
@@ -35,7 +36,7 @@ async function createSession(user, permissions, organizationId, device, userOrga
 
   if (permissions) {
     const hashedPermissions = permissions.map((permission) => this.helpers.md5(`${sessionHash}${permission}${config.sessionSalt}${(organizationId) ? organizationId : ''}`));
-    await this.redis.set(`permissions:${device}:${user.id}`, hashedPermissions);
+    await this.redis.addToSet(`permissions:${device}:${user.id}`, hashedPermissions);
     await this.redis.expire(`permissions:${device}:${user.id}`, expirationInSeconds);
   }
 

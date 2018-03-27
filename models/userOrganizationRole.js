@@ -1,5 +1,6 @@
 'use strict';
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 module.exports = function(db) {
   const UserOrganizationRole = db.define('UserOrganizationRole', {
@@ -86,6 +87,67 @@ module.exports = function(db) {
     return this.destroy({
       where: { userId, roleId, organizationId }
     });
+  };
+
+  UserOrganizationRole.getUsersInSameOrganization = async function(id, options = {}) {
+    const userOrganizationRole = await this.findOne({
+      where: { id },
+      attributes: ['organizationId']
+    });
+
+    if (!userOrganizationRole) {
+      throw new Errors.UserOrganizationRoleNotFoundError();
+    }
+
+    const userModel = {
+      model: this.sequelize.models.User,
+      as: 'user'
+    };
+
+    // Query
+    if (options.q) {
+      userModel.where = {
+        [Op.or]: {
+          name: {
+            [Op.like]: `%${options.q}%`
+          },
+          email: {
+            [Op.like]: `%${options.q}%`
+          }
+        }
+      };
+    }
+
+    const query = {
+      where: {
+        organizationId: userOrganizationRole.organizationId
+      },
+      include: [userModel]
+    };
+
+    // Sorting
+    switch (options.sort) {
+      case 'name':
+        query.order = [[userModel, 'name', options.order || 'asc']];
+        break;
+      case 'email':
+        query.order = [[userModel, 'email', options.order || 'asc']];
+        break;
+    }
+
+    // Pagination
+    if (options.count !== undefined) {
+      query.limit = options.count;
+    }
+
+    if (options.cursor !== undefined) {
+      query.offset = options.cursor;
+    }
+
+    // Find all users
+    const users = await UserOrganizationRole.findAll(query);
+
+    return users.map(({ user }) => user);
   };
 
   return UserOrganizationRole;
