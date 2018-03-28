@@ -41,7 +41,7 @@
     "error-factory": "^0.1.6",
     "eslint-plugin-hapi": "^4.0.0",
     "forever": "^0.15.3",
-    "hapi": "^16.5.2",
+    "hapi": "^16.6.3",
     "hapi-auth-jwt2": "^7.3.0",
     "hapi-swagger": "^4.3.0",
     "inert": "^3.2.1",
@@ -63,5 +63,9 @@
     "licensecheck": "^0.3.0",
     "open": "0.0.5",
     "sinon": "^1.17.3"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
   }
 }
