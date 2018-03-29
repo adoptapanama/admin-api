@@ -76,8 +76,8 @@ async function createTestSetup() {
   const { Permission, User, Organization, Role } = server.server.models;
 
   const [firstOrganization, secondOrganization] = await Promise.all([
-    Organization.createOrganization('First Organization', 'First'),
-    Organization.createOrganization('Second Organization', 'Second')
+    Organization.createOrganization('First Organization', 'First', 'https://twitter.com/firstorganization', 'https://facebook.com/firstorganization', 'https://instagram.com/firstorganization'),
+    Organization.createOrganization('Second Organization', 'Second', 'https://twitter.com/secondorganization', 'https://facebook.com/secondorganization', 'https://instagram.com/secondorganization')
   ]);
 
   // Create role

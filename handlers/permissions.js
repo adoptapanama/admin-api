@@ -9,7 +9,6 @@ function errorHandler(reply, e) {
 exports.listPermissions = async function({ auth, query}, reply) {
   try {
     const { userOrganizationRoleId, super: superUser } = auth.credentials;
-
     // If user is not logged in to a role, return empty
     if (!userOrganizationRoleId && !superUser) {
       return reply([]).code(200);
