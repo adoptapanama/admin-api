@@ -81,15 +81,31 @@ module.exports = {
     const organizations = action.createTable('organizations', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        allowNull: false,
-        primaryKey: true
+        defaultValue:Sequelize.UUIDV4,
+        primaryKey: true,
+        allowNull: false
       },
       name: {
         type: Sequelize.STRING(128),
         allowNull: false
       },
+
       description: {
+        type: Sequelize.STRING(256),
+        allowNull: true
+      },
+
+      twitter: {
+        type: Sequelize.STRING(256),
+        allowNull: true
+      },
+
+      facebook: {
+        type: Sequelize.STRING(256),
+        allowNull: true
+      },
+
+      instagram: {
         type: Sequelize.STRING(256),
         allowNull: true
       },
@@ -145,6 +161,7 @@ module.exports = {
     return Promise.all([
       db.query(addIndex('role_permissions', 'roleId')),
       db.query(addIndex('role_permissions', 'permissionId')),
+      db.query(addIndex('organizations', 'name')),
       db.query(addIndex('user_organization_roles', 'userId')),
       db.query(addIndex('user_organization_roles', 'organizationId'))
     ]);
@@ -154,6 +171,7 @@ module.exports = {
     await Promise.all([
       db.query(removeIndex('role_permissions', 'roleId')),
       db.query(removeIndex('role_permissions', 'permissionId')),
+      db.query(removeIndex('organizations', 'name')),
       db.query(removeIndex('user_organization_roles', 'userId')),
       db.query(removeIndex('user_organization_roles', 'organizationId'))
     ]);

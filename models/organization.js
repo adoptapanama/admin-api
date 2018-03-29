@@ -16,6 +16,18 @@ module.exports = function(db) {
     description: {
       type: Sequelize.STRING(256),
       allowNull: true
+    },
+    twitter: {
+      type: Sequelize.STRING(256),
+      allowNull: true
+    },
+    facebook: {
+      type: Sequelize.STRING(256),
+      allowNull: true
+    },
+    instagram: {
+      type: Sequelize.STRING(256),
+      allowNull: true
     }
   }, {
     tableName: 'organizations'
@@ -23,8 +35,14 @@ module.exports = function(db) {
   // Instance Methods
 
   // Static Methods
-  Organization.createOrganization = function(name, description) {
-    return this.create({ name, description });
+  Organization.createOrganization = function(name, description, twitter, facebook, instagram) {
+    return this.create({ name, description, twitter, facebook, instagram });
+  };
+
+  Organization.listOrganizations = function() {
+    return this.findAll({
+      order: [['name', 'ASC']]
+    });
   };
 
   Organization.getOrganizationByName = function(name) {
