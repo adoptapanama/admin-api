@@ -50,7 +50,13 @@ module.exports = function(db) {
       where: { name }
     });
   };
-
+  //Get Specific
+  Organization.getOrganizationByID = function(id,name){
+    return this.findOne({
+      where: {id}
+    });
+  };
+    //End Get specific
   return Organization;
 };
 
